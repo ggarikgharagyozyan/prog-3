@@ -1,4 +1,5 @@
-class SuperHuman extends LivingCreature {
+let livingCreature = require("./livingCreature.js")
+module.exports = class SuperHuman extends livingCreature {
     constructor(x, y) {
         super(x, y)
     }
@@ -56,7 +57,7 @@ class SuperHuman extends LivingCreature {
                     grassEatArr.splice(i, 1)
                     break;
                 }
-            }
+            }       
         } else {
             this.move()
         }

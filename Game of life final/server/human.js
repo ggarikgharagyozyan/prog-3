@@ -1,4 +1,5 @@
-class Human extends LivingCreature{
+let livingCreature = require("./livingCreature.js")
+module.exports = class Human extends livingCreature{
     constructor(x, y){
         super(x, y)        
     }
