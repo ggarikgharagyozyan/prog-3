@@ -1,3 +1,12 @@
+var {random} = require("./random")
+// var socket=io()
+
+// socket.on("my_matrix", matrix)
+// function matrix(x){
+//     var matrix2=x
+//     return matrix2
+// }
+
 let livingCreature = require("./livingCreature.js")
 module.exports = class Predator extends livingCreature {
     constructor(x, y) {
