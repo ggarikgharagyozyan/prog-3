@@ -120,21 +120,20 @@ function game(){
     for (var i in grassArr) {
         grassArr[i].mul()
     }
-    // for (var i in grassEatArr) {
-    //     grassEatArr[i].eat()
-    // }
-    // for (var i in predatorArr) {
-    //     predatorArr[i].eat()
-    // }
-    // for (var i in humanArr) {
-    //     humanArr[i].kill()
-    // }
-    // for(var i in superHumanArr){
-    //     superHumanArr[i].kill()
-    // }
-console.log('c_g=>', grassArr.length,'c_ge=>', grassEatArr.length, 'pr=>',predatorArr.length   )
+    for (var i in grassEatArr) {
+        grassEatArr[i].eat()
+    }
+    for (var i in predatorArr) {
+        predatorArr[i].eat()
+    }
+    for (var i in humanArr) {
+        humanArr[i].kill()
+    }
+    for(var i in superHumanArr){
+        superHumanArr[i].kill()
+    }
    io.sockets.emit("my_matrix", matrix) //uxarkel
 }
 generateMatrix()
 createObject()
-setInterval(game, 2000)
+setInterval(game, 500)

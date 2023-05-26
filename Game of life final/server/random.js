@@ -1,8 +1,11 @@
 function random(numb) {
-    console.log(numb, "aaaaaaa")
-    let number = Math.floor(Math.random() * numb)
-    console.log(number, "this is number")
-    return number
+    if(Array.isArray(numb)){
+        let number = Math.floor(Math.random() * numb.length)
+        return numb[number]
+    }else{
+        let number = Math.floor(Math.random() * numb)
+        return number
+    }
 }
 
 module.exports = {random}

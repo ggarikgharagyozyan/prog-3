@@ -28,6 +28,7 @@ module.exports = class GrassEater extends livingCreature {
         if(newCell){
             let newX=newCell[0]
             let newY=newCell[1]
+            console.log(this.y + this.x);
             matrix[this.y][this.x]=0
             matrix[newY][newX]=2
             this.x= newX
