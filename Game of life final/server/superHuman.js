@@ -1,4 +1,5 @@
 let livingCreature = require("./livingCreature.js")
+let Grass = require("./class.js")
 var {random} = require("./random")
 // var socket=io()
 

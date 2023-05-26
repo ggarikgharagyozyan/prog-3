@@ -89,6 +89,7 @@ function generateMatrix() {
             }
         }
     }
+    matrix[matrix.length-1][matrix[0].length]=5
 }
 io.on('connection', function (socket) {
     // socket.emit("my_matrix", matrix) //uxarkel
