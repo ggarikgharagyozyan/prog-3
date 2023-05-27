@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+var { random } = require("./random")
 
 app.use(express.static("../client"));
 
@@ -13,8 +14,8 @@ server.listen(3000, function () {
     console.log("Example is running on port 3000");
 });
 
-
-
+let time=0
+let weather = 1
 let Grass = require("./class.js")
 let GrassEater = require("./grassEater.js")
 let Human = require("./human.js")
@@ -28,9 +29,17 @@ predatorArr = []
 humanArr = []
 superHumanArr = []
 
-function random(numb) {
-    let number = Math.floor(Math.random() * numb)
-    return number
+var data = {
+    matrix: [],
+    weather: weather,
+}
+var characters = {
+    grassArr: [],
+    grassEatArr: [],
+    predatorArr: [],
+    humanArr: [],
+    superHumanArr: [],
+    weather: weather,
 }
 
 
@@ -40,13 +49,13 @@ function generateMatrix() {
     let predatorCounter = 0;
     let humanCounter = 0
 
-    let maxGrassEaterCounter = 100
-    let maxPredatorCounter = 10
-    let maxHumanCounter = 10
+    let maxGrassEaterCounter = 60
+    let maxPredatorCounter = 80
+    let maxHumanCounter = 60
 
-    for (let i = 0; i <= 10; i++) {
+    for (let i = 0; i <= 20; i++) {
         matrix[i] = [];
-        for (let j = 0; j <= 10; j++) {
+        for (let j = 0; j <= 20; j++) {
             if (predatorCounter <= maxPredatorCounter && grassEaterCounter <= maxGrassEaterCounter && humanCounter <= maxHumanCounter) {
                 let newObj = Math.floor(random(5));
                 if (newObj === 2) {
@@ -89,13 +98,18 @@ function generateMatrix() {
             }
         }
     }
-    matrix[matrix.length-1][matrix[0].length]=5
+    matrix[matrix.length - 1][matrix[0].length] = 5
 }
 io.on('connection', function (socket) {
     // socket.emit("my_matrix", matrix) //uxarkel
-}); 
+});
 
-function createObject(){
+function createObject() {
+    grassArr = []
+    grassEatArr = []
+    predatorArr = []
+    humanArr = []
+    superHumanArr = []
     for (let y = 0; y < matrix.length; y++) {
         for (let x = 0; x < matrix[y].length; x++) {
             if (matrix[y][x] === 1) {
@@ -110,31 +124,101 @@ function createObject(){
             } else if (matrix[y][x] === 4) {
                 let humanObj = new Human(x, y)
                 humanArr.push(humanObj)
-            } else if(matrix[y][x] === 5){
-                let superHuman= new SuperHuman(x, y)
+            } else if (matrix[y][x] === 5) {
+                let superHuman = new SuperHuman(x, y)
                 superHumanArr.push(superHuman)
             }
         }
     }
 }
-function game(){
+function grassEaterBomb(){
+    for(var i =0; i<10; i++){
+        let x = random(matrix.length)
+        let y = random(matrix.length)
+        for(var i in grassArr){
+            if(x === grassArr[i].x && y === grassArr[i].y){
+                grassArr.splice(i, 1)
+                break;
+            }
+        }
+        for (var i in predatorArr) {
+            if (x === predatorArr[i].x && y === predatorArr[i].y) {
+                predatorArr.splice(i, 1)
+                break;
+            }
+        }
+        for (var i in grassEatArr) {
+            if (x === grassEatArr[i].x && y === grassEatArr[i].y) {
+                grassEatArr.splice(i, 1)
+                break;
+            }
+        } 
+        if(x==superHumanArr[0].x && y==superHumanArr[0].y){
+            
+        }else{
+            matrix[x][y]=2
+            grassEatArr.push(new GrassEater(x, y))
+        }
+        
+    }
+}
+function game() {
+    time++
     for (var i in grassArr) {
-        grassArr[i].mul()
+        if (weather !== 1) {
+            grassArr[i].mul()
+        }
     }
     for (var i in grassEatArr) {
-        grassEatArr[i].eat()
+        if(weather % 2 == 0 ){
+            grassEatArr[i].eat()
+        }else{
+            grassEatArr[i].mul()
+        }
     }
     for (var i in predatorArr) {
-        predatorArr[i].eat()
+        if(weather !==4){
+            predatorArr[i].eat()
+        }else{
+            predatorArr[i].move()
+        }
     }
     for (var i in humanArr) {
-        humanArr[i].kill()
+        if (weather !== 3) {
+            humanArr[i].kill()
+        }
     }
-    for(var i in superHumanArr){
-        superHumanArr[i].kill()
+    for (var i in superHumanArr) {
+        if(weather == 1){
+            superHumanArr[i].kill()
+        }else{
+            superHumanArr[i].kill()
+            superHumanArr[i].kill()
+            superHumanArr[i].kill()
+        }
     }
-   io.sockets.emit("my_matrix", matrix) //uxarkel
+    if(time % 5 === 0 ){
+        if (weather >= 4) {
+            weather = 1
+        } else {
+            weather++
+        }
+    }
+    if(time % 20 === 0){
+        grassEaterBomb()
+    }
+    createObject()
+    console.log(weather)
+    data.matrix = matrix
+    data.weather = weather
+    characters.weather= weather
+    characters.grassArr = grassArr.length
+    characters.grassEatArr = grassEatArr.length
+    characters.predatorArr = predatorArr.length
+    characters.humanArr = humanArr.length
+    characters.superHumanArr = superHumanArr.length
+    io.sockets.emit("my_matrix", data) //uxarkel
+    io.sockets.emit("my_characters", characters)
 }
 generateMatrix()
-createObject()
-setInterval(game, 500)
+setInterval(game, 200)

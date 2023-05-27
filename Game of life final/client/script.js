@@ -1,27 +1,36 @@
 var socket=io()
 
 socket.on("my_matrix", my_draw)
+socket.on("my_characters", statistic)
 
 function setup() {
-    createCanvas(550, 550)
+    createCanvas(1000, 1000)
     background('#acacac');
 }
 
-function my_draw(matrix) {
-    for (var y = 0; y < matrix.length; y++) {
-        for (var x = 0; x < matrix[y].length; x++) {
-            if (matrix[y][x] == 1) {
-                fill("green");
+function my_draw(data) {
+    for (var y = 0; y < data.matrix.length; y++) {
+        for (var x = 0; x < data.matrix[y].length; x++) {
+            if (data.matrix[y][x] == 1) {
+                if(data.weather==1){
+                    fill("white");
+                }else if(data.weather==2){
+                    fill("green")
+                }else if(data.weather==3){
+                    fill("#34eb92")
+                }else if(data.weather==4){
+                    fill("#0a6639")
+                }
             }
-            else if (matrix[y][x] == 0) {
+            else if (data.matrix[y][x] == 0) {
                 fill("#acacac");
-            } else if (matrix[y][x] == 2) {
+            } else if (data.matrix[y][x] == 2) {
                 fill("yellow");
-            } else if (matrix[y][x] == 3) {
+            } else if (data.matrix[y][x] == 3) {
                 fill("red")
-            } else if (matrix[y][x] == 4) {
+            } else if (data.matrix[y][x] == 4) {
                 fill("orange")
-            }else if(matrix[y][x] == 5){
+            }else if(data.matrix[y][x] == 5){
                 fill("blue")
             }
             rect(x * 50, y * 50, 50, 50);
@@ -32,18 +41,30 @@ function my_draw(matrix) {
             */
         }
     }
-
-    // let statistic=`
-    // Grasses: ${grassArr.length}
-    // Grass Eaters: ${grassEatArr.length}
-    // Humans: ${humanArr.length}
-    // SuperHuman: ${superHumanArr.length}
-    // Predators: ${predatorArr.length}`
+}
+function statistic(characters){
+    let statistic=`
+    Grasses: ${characters.grassArr}
+    Grass Eaters: ${characters.grassEatArr}
+    Humans: ${characters.humanArr}
+    SuperHuman: ${characters.superHumanArr}
+    Predators: ${characters.predatorArr}`
     
-    // fill("#acacac")
-    // rect(100, 650, matrix[0].length * side - 250, matrix.length * side - 330)
-    // fill("black")
-    // textSize(32)
-    // text(statistic, matrix[0].length * side - 450, matrix.length * side + 100)
+    let weatherName;
 
+    if(characters.weather==1){
+        weatherName="Winter"
+    }else if(characters.weather==2){
+        weatherName="Spring"
+    }else if(characters.weather==3){
+        weatherName="Summer"
+    }else if(characters.weather==4){
+        weatherName="Autumn"
+    }
+
+    let finalText=`${statistic}
+    ${weatherName}`
+
+    let p=document.getElementById("statistic")
+    p.innerText = finalText
 }
