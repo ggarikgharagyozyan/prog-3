@@ -1,10 +1,27 @@
-var socket=io()
+var socket = io();
 
-socket.on("my_matrix", my_draw)
-socket.on("my_characters", statistic)
+socket.on("my_matrix", my_draw);
+socket.on("my_characters", statistic);
 
+var statuss=true
+function restart(){
+    let restart_checking=false
+    restart_checking=true
+    socket.emit("restart_checking", restart_checking) 
+}
+function pause(){
+    statuss=false
+    socket.emit("play_pause", false)
+}
+function play(){
+    statuss=true
+    socket.emit("play_pause", true)
+}
+let button = document.getElementById("restart_button");
+let button2 = document.getElementById("play_pause");
+button.addEventListener("click", restart);
 function setup() {
-    createCanvas(1000, 1000)
+    createCanvas(700, 700)
     background('#acacac');
 }
 
@@ -33,13 +50,18 @@ function my_draw(data) {
             }else if(data.matrix[y][x] == 5){
                 fill("blue")
             }
-            rect(x * 50, y * 50, 50, 50);
+            rect(x * 35, y * 35, 35, 35);
 
-            /*
-            fill("blue")
-            text(x+" "+y, x*side+side/2,y*side+side/2)
-            */
         }
+    }
+    if(statuss){
+        button2.innerText="Pause"
+        button2.addEventListener("click", pause);
+        button2.removeEventListener("click", play);
+    }else if(!statuss){
+        button2.innerText="Play"
+        button2.addEventListener("click", play);
+        button2.removeEventListener("click", pause);
     }
 }
 function statistic(characters){

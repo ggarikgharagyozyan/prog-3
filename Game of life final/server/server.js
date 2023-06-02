@@ -14,7 +14,8 @@ server.listen(3000, function () {
     console.log("Example is running on port 3000");
 });
 
-let time=0
+let status_of_game=true
+let time = 0
 let weather = 1
 let Grass = require("./class.js")
 let GrassEater = require("./grassEater.js")
@@ -100,9 +101,23 @@ function generateMatrix() {
     }
     matrix[matrix.length - 1][matrix[0].length] = 5
 }
-io.on('connection', function (socket) {
-    // socket.emit("my_matrix", matrix) //uxarkel
-});
+
+var gameInterval = null
+
+function restart_function(data){
+    if(data){
+        generateMatrix()
+        createObject()
+    }
+}
+function play_pause(data) {
+    if (data) {
+        status_of_game=true
+    } else{
+        status_of_game=false
+    }
+}
+
 
 function createObject() {
     grassArr = []
@@ -131,12 +146,12 @@ function createObject() {
         }
     }
 }
-function grassEaterBomb(){
-    for(var i =0; i<10; i++){
+function grassEaterBomb() {
+    for (var i = 0; i < 10; i++) {
         let x = random(matrix.length)
         let y = random(matrix.length)
-        for(var i in grassArr){
-            if(x === grassArr[i].x && y === grassArr[i].y){
+        for (var i in grassArr) {
+            if (x === grassArr[i].x && y === grassArr[i].y) {
                 grassArr.splice(i, 1)
                 break;
             }
@@ -152,66 +167,64 @@ function grassEaterBomb(){
                 grassEatArr.splice(i, 1)
                 break;
             }
-        } 
-        if(x==superHumanArr[0].x && y==superHumanArr[0].y){
-            
-        }else{
-            matrix[x][y]=2
-            grassEatArr.push(new GrassEater(x, y))
         }
-        
+        matrix[x][y] = 2
+        grassEatArr.push(new GrassEater(x, y))
     }
 }
+
 function game() {
-    time++
-    for (var i in grassArr) {
-        if (weather !== 1) {
-            grassArr[i].mul()
+    if(status_of_game==true){
+
+        time++
+        for (var i in grassArr) {
+            if (weather !== 1) {
+                grassArr[i].mul()
+            }
         }
-    }
-    for (var i in grassEatArr) {
-        if(weather % 2 == 0 ){
-            grassEatArr[i].eat()
-        }else{
-            grassEatArr[i].mul()
+        for (var i in grassEatArr) {
+            if (weather % 2 == 0) {
+                grassEatArr[i].eat()
+            } else {
+                grassEatArr[i].mul()
+            }
         }
-    }
-    for (var i in predatorArr) {
-        if(weather !==4){
-            predatorArr[i].eat()
-        }else{
-            predatorArr[i].move()
+        for (var i in predatorArr) {
+            if (weather !== 4) {
+                predatorArr[i].eat()
+            } else {
+                predatorArr[i].move()
+            }
         }
-    }
-    for (var i in humanArr) {
-        if (weather !== 3) {
-            humanArr[i].kill()
+        for (var i in humanArr) {
+            if (weather !== 3) {
+                humanArr[i].kill()
+            }
         }
-    }
-    for (var i in superHumanArr) {
-        if(weather == 1){
-            superHumanArr[i].kill()
-        }else{
-            superHumanArr[i].kill()
-            superHumanArr[i].kill()
-            superHumanArr[i].kill()
+        for (var i in superHumanArr) {
+            if (weather == 1) {
+                superHumanArr[i].kill()
+            } else {
+                superHumanArr[i].kill()
+                superHumanArr[i].kill()
+                superHumanArr[i].kill()
+            }
         }
-    }
-    if(time % 5 === 0 ){
-        if (weather >= 4) {
-            weather = 1
-        } else {
-            weather++
+        if (time % 5 === 0) {
+            if (weather >= 4) {
+                weather = 1
+            } else {
+                weather++
+            }
         }
+        if (time % 20 === 0) {
+            grassEaterBomb()
+        }
+        createObject()
     }
-    if(time % 20 === 0){
-        grassEaterBomb()
-    }
-    createObject()
-    console.log(weather)
     data.matrix = matrix
     data.weather = weather
-    characters.weather= weather
+    characters.weather = weather
     characters.grassArr = grassArr.length
     characters.grassEatArr = grassEatArr.length
     characters.predatorArr = predatorArr.length
@@ -220,5 +233,11 @@ function game() {
     io.sockets.emit("my_matrix", data) //uxarkel
     io.sockets.emit("my_characters", characters)
 }
-generateMatrix()
+    
 setInterval(game, 200)
+generateMatrix()
+
+io.on('connection', function (socket) {
+    socket.on("restart_checking", restart_function)
+    socket.on("play_pause", play_pause)
+})
